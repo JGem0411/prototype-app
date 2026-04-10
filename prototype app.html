@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Locker Lounge Prototype</title>
+    <style>
+        /* CSS Variables for Brand Colors */
+        :root {
+            --primary-teal: #008080;
+            --light-teal: #e0f2f1;
+            --dark-grey: #333333;
+            --white: #ffffff;
+            --bg-color: #f4f7f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* External Prototype Reset Button */
+        .external-reset {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: background-color 0.2s;
+        }
+
+        .external-reset:hover {
+            background-color: #cc0000;
+        }
+
+        /* Mobile Phone Container Simulation */
+        #mobile-container {
+            width: 375px;
+            height: 812px;
+            background-color: var(--bg-color);
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            border: 8px solid var(--dark-grey);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            background-color: var(--bg-color);
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            background-color: var(--primary-teal);
+            color: var(--white);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .app-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+            border-radius: 25px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease-out;
+            object-fit: cover;
+            background-color: #f4f4f4; 
+        }
+
+        #splash-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        #splash-screen p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .name-input {
+            width: 80%;
+            padding: 15px;
+            border-radius: 25px;
+            border: none;
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            animation: slideUp 1s ease-out;
+            outline: none;
+        }
+
+        .btn-start {
+            background-color: var(--white);
+            color: var(--primary-teal);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            animation: slideUp 1.2s ease-out;
+            transition: transform 0.2s;
+        }
+
+        .btn-start:active {
+            transform: scale(0.95);
+        }
+
+        /* --- DASHBOARD SCREEN --- */
+        .header {
+            background-color: var(--primary-teal);
+            color: var(--white);
+            padding: 40px 20px 20px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .card {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .card h3 {
+            color: var(--dark-grey);
+            margin-bottom: 5px;
+        }
+
+        .status {
+            color: var(--primary-teal);
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .btn-action {
+            width: 100%;
+            background-color: var(--primary-teal);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-combo {
+            background-color: #ff9800; 
+            color: white;
+        }
+
+        /* --- BOOKING & PAYMENT SCREENS --- */
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .options-group {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: none; 
+        }
+
+        .options-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--dark-grey);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .options-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            outline: none;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pay-btn {
+            background-color: var(--light-teal);
+            color: var(--primary-teal);
+            border: 2px solid var(--primary-teal);
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .qrph-box {
+            width: 180px;
+            height: 180px;
+            background: url('https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=QRPH_Mock_Payment') no-repeat center center;
+            background-size: cover;
+            margin: 20px auto;
+            border: 8px solid var(--primary-teal);
+            border-radius: 10px;
+        }
+
+        /* --- SUCCESS SCREEN --- */
+        #success-screen {
+            align-items: center;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .qr-box {
+            width: 150px;
+            height: 150px;
+            background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LockerLoungeAccessKey12345') no-repeat center center;
+            background-size: cover;
+            margin: 10px auto;
+            border: 8px solid var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .ref-box {
+            margin: 10px auto;
+            width: 90%;
+            padding: 15px;
+            border: 2px dashed var(--primary-teal);
+            border-radius: 15px;
+            background-color: var(--light-teal);
+        }
+    </style>
+</head>
+<body>
+
+    <button class="external-reset" onclick="resetPrototype()">🔄 Reset Prototype Data</button>
+
+    <div id="mobile-container">
+        
+        <div id="splash-screen" class="screen active">
+            <img src="logo.png" alt="Locker Lounge Logo" class="app-logo">
+            <h1>Locker Lounge</h1>
+            <p>Refresh. Secure. Recharge.</p>
+            <input type="text" id="userNameInput" class="name-input" placeholder="Enter your first name" autocomplete="off">
+            <button class="btn-start" onclick="login()">Tap to Start</button>
+        </div>
+
+        <div id="dashboard" class="screen">
+            <div class="header">
+                <h2>Welcome, <span id="displayName">Commuter</span>!</h2>
+                <p>STI College Ortigas-Cainta</p>
+            </div>
+            <div class="content">
+                
+                <div class="card" id="active-booking-card" style="display: none; border: 2px solid var(--primary-teal); background-color: var(--light-teal);">
+                    <h3>Your Active Pass</h3>
+                    <p class="status" style="color: var(--dark-grey);">You have a confirmed reservation.</p>
+                    <button class="btn-action" onclick="generateSuccess()">View Access Key / Reference</button>
+                </div>
+
+                <div class="card">
+                    <h3>Smart Locker</h3>
+                    <p class="status">🟢 12 Units Available</p>
+                    <button class="btn-action" onclick="initiateBooking('locker')">Book Locker</button>
+                </div>
+                <div class="card">
+                    <h3>Premium Shower</h3>
+                    <p class="status">🟡 2 Suites Available</p>
+                    <button class="btn-action" style="background-color: var(--dark-grey);" onclick="initiateBooking('shower')">Reserve Shower</button>
+                </div>
+                <div class="card" style="border: 2px solid #ff9800;">
+                    <h3>Refresh Combo 🌟</h3>
+                    <p class="status" style="color: #ff9800;">Locker + Shower Bundle</p>
+                    <button class="btn-action btn-combo" onclick="initiateBooking('combo')">Get Combo Pass</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="booking" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="navTo('dashboard')">← Back</button>
+                <h2>Checkout</h2>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <h3 id="bookingTitle">Reservation</h3>
+                    <p id="bookingDetails" style="font-size: 0.9rem; color: var(--dark-grey);">Configure your booking below.</p>
+                    
+                    <div id="lockerOptions" class="options-group">
+                        <label>Locker Duration</label>
+                        <select id="lockerDuration" onchange="updatePrice()">
+                            <option value="40">3 Hours (₱40.00)</option>
+                            <option value="70">6 Hours (₱70.00)</option>
+                            <option value="100">Whole Day (₱100.00)</option>
+                        </select>
+                    </div>
+
+                    <div id="showerOptions" class="options-group">
+                        <label>Shower Add-ons</label>
+                        <select id="showerAddon" onchange="updatePrice()">
+                            <option value="0">Bring Your Own (₱0.00)</option>
+                            <option value="20">Towel Rental (+₱20.00)</option>
+                            <option value="15">Toiletries Packet (+₱15.00)</option>
+                            <option value="35">Towel + Toiletries (+₱35.00)</option>
+                        </select>
+                    </div>
+
+                    <p id="bookingPrice" style="font-weight: bold; font-size: 1.2rem; margin-top: 15px; color: var(--primary-teal); text-align: center;">Total: ₱0.00</p>
+                    
+                    <div class="payment-options">
+                        <button class="pay-btn" onclick="goToQRPH()">Pay via QRPH</button>
+                        <button class="pay-btn" onclick="goToOnSite()">Reserve & Pay On-Site</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="qrph-payment" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="navTo('booking')">← Cancel</button>
+                <h2>Scan to Pay</h2>
+            </div>
+            <div class="content" style="text-align: center; margin-top: 20px;">
+                <p style="color: var(--dark-grey); font-weight: bold;">Scan via GCash or Maya</p>
+                <div class="qrph-box"></div>
+                <p style="margin-bottom: 30px; font-size: 0.9rem;">Waiting for payment confirmation...</p>
+                <button class="btn-action" style="width: 90%;" onclick="confirmPayment()">Confirm Payment</button>
+            </div>
+        </div>
+
+        <div id="onsite-payment" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="navTo('booking')">← Cancel</button>
+                <h2>On-Site Payment</h2>
+            </div>
+            <div class="content" style="text-align: center; margin-top: 20px;">
+                <p style="color: var(--dark-grey); font-weight: bold;">Present this reference to the front desk to pay via cash:</p>
+                <div class="ref-box" style="margin-top: 20px;">
+                    <p style="font-size: 0.9rem; color: var(--dark-grey);">Pending Reference</p>
+                    <h3 id="onsite-ref-display" style="color: #ff9800; letter-spacing: 2px; margin-top: 5px; font-size: 1.4rem;">GUEST-123456</h3>
+                </div>
+                <p style="margin-bottom: 30px; font-size: 0.9rem; color: #ff9800; font-weight: bold;">Status: Awaiting Payment...</p>
+                
+                <button class="btn-action" style="width: 90%; background-color: var(--dark-grey);" onclick="confirmPayment()">Simulate Front Desk Approval</button>
+            </div>
+        </div>
+
+        <div id="success-screen" class="screen">
+            <h2 style="color: var(--primary-teal); margin-top: 40px; margin-bottom: 10px;">Booking Confirmed!</h2>
+            
+            <div id="dynamic-content" style="width: 100%; padding: 0 20px;">
+                </div>
+
+            <button class="btn-action" style="width: 80%; margin: 20px auto 40px auto;" onclick="navTo('dashboard')">Back to Home</button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentBookingType = '';
+        let currentUserName = 'GUEST';
+        let currentRefNumber = ''; 
+
+        // 1. Local Storage Check on App Load (Failsafe)
+        document.addEventListener('DOMContentLoaded', () => {
+            const isBooked = localStorage.getItem('LL_isBooked');
+            
+            if (isBooked === 'true') {
+                // Restore previous data from local storage
+                currentBookingType = localStorage.getItem('LL_bookingType');
+                currentRefNumber = localStorage.getItem('LL_refNumber');
+                currentUserName = localStorage.getItem('LL_userName') || 'GUEST';
+                
+                // Update Dashboard visually
+                document.getElementById('displayName').innerText = currentUserName;
+                document.getElementById('active-booking-card').style.display = 'block';
+                
+                // Skip splash screen because they already logged in and booked
+                navTo('dashboard');
+            }
+        });
+
+        // 2. Clear Local Storage and Refresh (External Button)
+        function resetPrototype() {
+            localStorage.clear();
+            window.location.reload();
+        }
+
+        // --- Core App Functions ---
+        function login() {
+            const nameInput = document.getElementById('userNameInput').value.trim();
+            if (nameInput !== '') {
+                currentUserName = nameInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                document.getElementById('displayName').innerText = nameInput;
+            } else {
+                currentUserName = 'GUEST';
+                document.getElementById('displayName').innerText = 'Commuter';
+            }
+            navTo('dashboard');
+        }
+
+        function navTo(targetScreenId) {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(targetScreenId).classList.add('active');
+        }
+
+        function initiateBooking(type) {
+            currentBookingType = type;
+            const lockerOpts = document.getElementById('lockerOptions');
+            const showerOpts = document.getElementById('showerOptions');
+
+            document.getElementById('lockerDuration').value = "40";
+            document.getElementById('showerAddon').value = "0";
+            
+            if (type === 'locker') {
+                document.getElementById('bookingTitle').innerText = 'Smart Locker';
+                lockerOpts.style.display = 'block';
+                showerOpts.style.display = 'none';
+            } else if (type === 'shower') {
+                document.getElementById('bookingTitle').innerText = 'Premium Shower Suite';
+                lockerOpts.style.display = 'none';
+                showerOpts.style.display = 'block';
+            } else if (type === 'combo') {
+                document.getElementById('bookingTitle').innerText = 'Refresh Combo Pass';
+                lockerOpts.style.display = 'block';
+                showerOpts.style.display = 'block';
+            }
+            
+            updatePrice(); 
+            navTo('booking');
+        }
+
+        function updatePrice() {
+            let total = 0;
+            const lockerPrice = parseInt(document.getElementById('lockerDuration').value);
+            const showerAddonPrice = parseInt(document.getElementById('showerAddon').value);
+            const lockerText = document.getElementById('lockerDuration').options[document.getElementById('lockerDuration').selectedIndex].text.split(' (')[0];
+            const showerText = document.getElementById('showerAddon').options[document.getElementById('showerAddon').selectedIndex].text.split(' (')[0];
+
+            if (currentBookingType === 'locker') {
+                total = lockerPrice;
+                document.getElementById('bookingDetails').innerText = `Time: ${lockerText}`;
+            } else if (currentBookingType === 'shower') {
+                total = 60 + showerAddonPrice; 
+                document.getElementById('bookingDetails').innerText = `Add-ons: ${showerText}`;
+            } else if (currentBookingType === 'combo') {
+                const extraLockerCost = lockerPrice - 40; 
+                total = 85 + extraLockerCost + showerAddonPrice;
+                document.getElementById('bookingDetails').innerText = `Locker: ${lockerText}\nShower: ${showerText}`;
+            }
+
+            document.getElementById('bookingPrice').innerText = `Total: ₱${total.toFixed(2)}`;
+        }
+
+        function goToQRPH() {
+            currentRefNumber = `${currentUserName}-${Math.floor(100000 + Math.random() * 900000)}`;
+            navTo('qrph-payment');
+        }
+
+        function goToOnSite() {
+            currentRefNumber = `${currentUserName}-${Math.floor(100000 + Math.random() * 900000)}`;
+            document.getElementById('onsite-ref-display').innerText = currentRefNumber;
+            navTo('onsite-payment');
+        }
+
+        // New function to save data right when payment is successful
+        function confirmPayment() {
+            localStorage.setItem('LL_isBooked', 'true');
+            localStorage.setItem('LL_bookingType', currentBookingType);
+            localStorage.setItem('LL_refNumber', currentRefNumber);
+            localStorage.setItem('LL_userName', currentUserName);
+            
+            document.getElementById('active-booking-card').style.display = 'block';
+            generateSuccess();
+        }
+
+        function generateSuccess() {
+            const contentDiv = document.getElementById('dynamic-content');
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            let htmlContent = '';
+
+            // Layout for Locker (Final QR Key)
+            if (currentBookingType === 'locker' || currentBookingType === 'combo') {
+                htmlContent += `
+                    <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <p style="color: var(--dark-grey); font-size: 0.9rem;">Locker Access Key</p>
+                        <div class="qr-box"></div>
+                        <p style="font-weight: bold; font-size: 1.1rem; color: var(--primary-teal);">Locker #08</p>
+                    </div>
+                `;
+            }
+
+            // Layout for Shower
+            if (currentBookingType === 'shower' || currentBookingType === 'combo') {
+                htmlContent += `
+                    <div class="ref-box">
+                        <p style="font-size: 0.8rem; color: var(--dark-grey);">Shower Reference</p>
+                        <h3 style="color: var(--primary-teal); letter-spacing: 1px; margin-top: 5px; font-size: 1.2rem;">${currentRefNumber}</h3>
+                        <p style="font-size: 0.8rem; color: var(--dark-grey); margin-top: 5px;">Date: ${today}</p>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = htmlContent;
+            navTo('success-screen');
+        }
+    </script>
+</body>
+</html>
