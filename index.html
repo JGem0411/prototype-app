@@ -321,7 +321,7 @@
                 
                 <div class="card" id="active-booking-card" style="display: none; border: 2px solid var(--primary-teal); background-color: var(--light-teal);">
                     <h3>Your Active Pass</h3>
-                    <p class="status" style="color: var(--dark-grey);">You have a confirmed reservation.</p>
+                    <p id="active-pass-status" class="status" style="color: var(--dark-grey);">You have a confirmed reservation.</p>
                     <button class="btn-action" onclick="generateSuccess()">View Access Key / Reference</button>
                 </div>
 
@@ -428,26 +428,33 @@
         let currentUserName = 'GUEST';
         let currentRefNumber = ''; 
 
+        // New Independent Tracking Variables
+        let ownsLocker = false;
+        let ownsShower = false;
+        let showerRefNumber = ''; 
+
         // 1. Local Storage Check on App Load (Failsafe)
         document.addEventListener('DOMContentLoaded', () => {
-            const isBooked = localStorage.getItem('LL_isBooked');
+            ownsLocker = localStorage.getItem('LL_ownsLocker') === 'true';
+            ownsShower = localStorage.getItem('LL_ownsShower') === 'true';
+            showerRefNumber = localStorage.getItem('LL_showerRef') || '';
+            currentUserName = localStorage.getItem('LL_userName') || 'GUEST';
             
-            if (isBooked === 'true') {
-                // Restore previous data from local storage
-                currentBookingType = localStorage.getItem('LL_bookingType');
-                currentRefNumber = localStorage.getItem('LL_refNumber');
-                currentUserName = localStorage.getItem('LL_userName') || 'GUEST';
-                
-                // Update Dashboard visually
+            if (ownsLocker || ownsShower) {
                 document.getElementById('displayName').innerText = currentUserName;
                 document.getElementById('active-booking-card').style.display = 'block';
                 
-                // Skip splash screen because they already logged in and booked
+                // Update text dynamically based on what they own
+                let passText = [];
+                if(ownsLocker) passText.push("Locker");
+                if(ownsShower) passText.push("Shower");
+                document.getElementById('active-pass-status').innerText = "Active: " + passText.join(" & ");
+                
                 navTo('dashboard');
             }
         });
 
-        // 2. Clear Local Storage and Refresh (External Button)
+        // 2. Clear Local Storage and Refresh
         function resetPrototype() {
             localStorage.clear();
             window.location.reload();
@@ -533,14 +540,32 @@
             navTo('onsite-payment');
         }
 
-        // New function to save data right when payment is successful
         function confirmPayment() {
-            localStorage.setItem('LL_isBooked', 'true');
-            localStorage.setItem('LL_bookingType', currentBookingType);
-            localStorage.setItem('LL_refNumber', currentRefNumber);
+            // Update ownership based on what was just bought
+            if (currentBookingType === 'locker') {
+                ownsLocker = true;
+            } else if (currentBookingType === 'shower') {
+                ownsShower = true;
+                showerRefNumber = currentRefNumber;
+            } else if (currentBookingType === 'combo') {
+                ownsLocker = true;
+                ownsShower = true;
+                showerRefNumber = currentRefNumber;
+            }
+
+            // Save to Local Storage
+            localStorage.setItem('LL_ownsLocker', ownsLocker);
+            localStorage.setItem('LL_ownsShower', ownsShower);
+            localStorage.setItem('LL_showerRef', showerRefNumber);
             localStorage.setItem('LL_userName', currentUserName);
             
+            // Update Dashboard UI
             document.getElementById('active-booking-card').style.display = 'block';
+            let passText = [];
+            if(ownsLocker) passText.push("Locker");
+            if(ownsShower) passText.push("Shower");
+            document.getElementById('active-pass-status').innerText = "Active: " + passText.join(" & ");
+
             generateSuccess();
         }
 
@@ -549,8 +574,8 @@
             const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             let htmlContent = '';
 
-            // Layout for Locker (Final QR Key)
-            if (currentBookingType === 'locker' || currentBookingType === 'combo') {
+            // Layout based on ALL owned items, not just the current booking
+            if (ownsLocker) {
                 htmlContent += `
                     <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                         <p style="color: var(--dark-grey); font-size: 0.9rem;">Locker Access Key</p>
@@ -560,12 +585,11 @@
                 `;
             }
 
-            // Layout for Shower
-            if (currentBookingType === 'shower' || currentBookingType === 'combo') {
+            if (ownsShower) {
                 htmlContent += `
                     <div class="ref-box">
                         <p style="font-size: 0.8rem; color: var(--dark-grey);">Shower Reference</p>
-                        <h3 style="color: var(--primary-teal); letter-spacing: 1px; margin-top: 5px; font-size: 1.2rem;">${currentRefNumber}</h3>
+                        <h3 style="color: var(--primary-teal); letter-spacing: 1px; margin-top: 5px; font-size: 1.2rem;">${showerRefNumber}</h3>
                         <p style="font-size: 0.8rem; color: var(--dark-grey); margin-top: 5px;">Date: ${today}</p>
                     </div>
                 `;
