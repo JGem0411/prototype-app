@@ -52,7 +52,7 @@
             background-color: #cc0000;
         }
 
-        /* Mobile Phone Container Simulation */
+        /* Mobile Phone Container Simulation (For Desktop/Laptops) */
         #mobile-container {
             width: 375px;
             height: 812px;
@@ -295,6 +295,28 @@
             border: 2px dashed var(--primary-teal);
             border-radius: 15px;
             background-color: var(--light-teal);
+        }
+
+        /* --- FULL SCREEN MOBILE OVERRIDE --- */
+        @media (max-width: 600px) {
+            body {
+                align-items: flex-start;
+                background-color: var(--bg-color);
+            }
+            #mobile-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+            .external-reset {
+                top: 10px;
+                right: 10px;
+                padding: 10px;
+                font-size: 0.8rem;
+                opacity: 0.8; /* Slightly faded so it doesn't distract on phone */
+            }
         }
     </style>
 </head>
