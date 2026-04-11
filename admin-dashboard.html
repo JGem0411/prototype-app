@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Locker Lounge - Admin POS</title>
+    <style>
+        :root {
+            --primary-teal: #008080;
+            --light-teal: #e0f2f1;
+            --dark-grey: #333333;
+            --bg-color: #f4f7f6;
+            --white: #ffffff;
+            --warning: #ff9800;
+            --success: #28a745;
+            --border: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-color); display: flex; height: 100vh; overflow: hidden; }
+
+        .external-user { position: fixed; top: 20px; left: 20px; background-color: var(--warning); color: white; border: none; padding: 10px 15px; font-size: 0.9rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; transition: 0.2s; }
+        .external-user:hover { background-color: #e68a00; }
+
+        .sidebar { width: 250px; background-color: var(--primary-teal); color: var(--white); display: flex; flex-direction: column; padding: 20px; padding-top: 70px; flex-shrink: 0; }
+        .sidebar h2 { font-size: 1.5rem; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .menu-item { padding: 12px 15px; margin-bottom: 10px; background-color: rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .menu-item.active, .menu-item:hover { background-color: var(--white); color: var(--primary-teal); }
+
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { color: var(--dark-grey); font-size: 1.8rem; }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background-color: var(--white); padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary-teal); }
+        .metric-card.warning { border-left-color: var(--warning); }
+        .metric-title { color: var(--dark-grey); font-size: 0.9rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .metric-value { font-size: 2rem; font-weight: bold; color: var(--primary-teal); }
+        .metric-card.warning .metric-value { color: var(--warning); }
+
+        .table-container { background-color: var(--white); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; width: 100%; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px 20px; border-bottom: 1px solid var(--border); }
+        th { background-color: #f8f9fa; color: var(--dark-grey); font-size: 0.9rem; text-transform: uppercase; }
+        tr:hover { background-color: #fcfcfc; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .badge.paid { background-color: #e6f4ea; color: var(--success); }
+        .badge.pending { background-color: #fff4e5; color: var(--warning); }
+
+        .btn-approve { background-color: var(--success); color: var(--white); border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-approve:hover { background-color: #218838; }
+
+        .facility-section { margin-bottom: 30px; }
+        .facility-section h3 { margin-bottom: 15px; color: var(--dark-grey); }
+        .facility-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; }
+        .grid-box { background-color: var(--white); border: 2px dashed var(--primary-teal); border-radius: 10px; padding: 20px; text-align: center; transition: 0.2s; position: relative; }
+        .grid-box.available { color: var(--primary-teal); }
+        .grid-box.occupied { background-color: #fff3e0; border: 2px solid var(--warning); color: var(--dark-grey); cursor: pointer; }
+        .grid-box.occupied:hover { background-color: #ffe0b2; }
+        .grid-box.occupied::after { content: "Click to Check Out"; position: absolute; bottom: 5px; left: 0; right: 0; font-size: 0.7rem; color: var(--warning); opacity: 0; transition: 0.2s; }
+        .grid-box.occupied:hover::after { opacity: 1; }
+        .grid-box h4 { font-size: 1.5rem; margin-bottom: 5px; }
+        .grid-box p { font-size: 0.8rem; font-weight: bold; }
+
+        .settings-card { background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); max-width: 500px; }
+        .settings-card p { margin-bottom: 20px; color: var(--dark-grey); }
+        .btn-danger { background-color: #dc3545; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-danger:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+
+    <button class="external-user" onclick="window.location.href='index.html'">📱 User View</button>
+
+    <div class="sidebar">
+        <h2>LL Admin</h2>
+        <div class="menu-item active" onclick="switchView('dashboard', this)">Live Dashboard</div>
+        <div class="menu-item" onclick="switchView('facility', this)">Facility Map</div>
+        <div class="menu-item" onclick="switchView('logs', this)">Transaction Logs</div>
+        <div class="menu-item" onclick="switchView('settings', this)">Settings</div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="view-dashboard" class="view-section active">
+            <div class="header">
+                <h1>Front Desk POS System</h1>
+                <p style="color: var(--dark-grey);">Live Syncing with App...</p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-title">Total Revenue</div>
+                    <div class="metric-value" id="val-revenue">₱0.00</div>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-title">Pending Approvals</div>
+                    <div class="metric-value" id="val-pending">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Lockers Available</div>
+                    <div class="metric-value" id="val-lockers">12 / 12</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Showers Available</div>
+                    <div class="metric-value" id="val-showers">2 / 2</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 15px; color: var(--dark-grey);">Active & Pending Queue</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Student</th>
+                            <th>Booking Type</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-facility" class="view-section">
+            <div class="header">
+                <h1>Facility Map & Checkout</h1>
+            </div>
+            
+            <div class="facility-section">
+                <h3>Smart Lockers Zone (Capacity: 12)</h3>
+                <div class="facility-grid" id="locker-grid"></div>
+            </div>
+
+            <div class="facility-section">
+                <h3>Premium Showers Zone (Capacity: 2)</h3>
+                <div class="facility-grid" id="shower-grid" style="grid-template-columns: repeat(2, 1fr);"></div>
+            </div>
+        </div>
+
+        <div id="view-logs" class="view-section">
+            <div class="header">
+                <h1>Complete Transaction Logs</h1>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>Student</th>
+                            <th>Booking Type</th>
+                            <th>Reference</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-settings" class="view-section">
+            <div class="header">
+                <h1>System Settings</h1>
+            </div>
+            <div class="settings-card">
+                <h3>Prototype Reset</h3>
+                <p>Clicking the button below will wipe all transactions, clear the revenue, and free up all lockers and showers globally.</p>
+                <button class="btn-danger" onclick="factoryReset()">⚠️ Factory Reset System</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- SYNCHRONIZED DATABASE LOGIC ---
+        let globalState = {
+            revenue: 0, pendingCount: 0, lockers: Array(12).fill(null), showers: Array(2).fill(null), transactions: []
+        };
+
+        const formatMoney = (amount) => `₱${amount.toFixed(2)}`;
+
+        function fetchGlobalState() {
+            let data = localStorage.getItem('LL_GlobalState');
+            if (data) { globalState = JSON.parse(data); } 
+            else { localStorage.setItem('LL_GlobalState', JSON.stringify(globalState)); }
+        }
+
+        function saveGlobalState() {
+            localStorage.setItem('LL_GlobalState', JSON.stringify(globalState));
+        }
+
+        // --- REAL-TIME POLLING ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setInterval(updateUI, 1000); // Poll database every 1 second
+            updateUI();
+        });
+
+        function switchView(viewId, element) {
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            updateUI();
+        }
+
+        function updateUI() {
+            fetchGlobalState(); // Get latest data from the User App
+
+            const usedLockers = globalState.lockers.filter(l => l !== null).length;
+            const usedShowers = globalState.showers.filter(s => s !== null).length;
+
+            document.getElementById('val-revenue').innerText = formatMoney(globalState.revenue);
+            document.getElementById('val-pending').innerText = globalState.pendingCount;
+            document.getElementById('val-lockers').innerText = `${12 - usedLockers} / 12`;
+            document.getElementById('val-showers').innerText = `${2 - usedShowers} / 2`;
+
+            renderDashboardTable();
+            renderLogsTable();
+            renderFacilityGrids();
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderDashboardTable() {
+            const tbody = document.getElementById('dashboard-table-body');
+            tbody.innerHTML = ''; 
+            
+            const allTx = [...globalState.transactions].reverse(); 
+
+            allTx.forEach(tx => {
+                const tr = document.createElement('tr');
+                let actionHTML = '';
+                
+                if (tx.status === 'Pending') {
+                    actionHTML = `<button class="btn-approve" onclick="approveTransaction(${tx.id})">Approve Cash</button>`;
+                } else if (tx.status === 'Paid') {
+                    actionHTML = `<span style="color: var(--dark-grey); font-style: italic;">Verified</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${tx.time}</td>
+                    <td><strong>${tx.name}</strong></td>
+                    <td>${tx.typeDef.name}</td>
+                    <td style="font-family: monospace;">${tx.ref}</td>
+                    <td><span class="badge ${tx.status.toLowerCase()}">${tx.status}</span></td>
+                    <td>${actionHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderLogsTable() {
+            const tbody = document.getElementById('logs-table-body');
+            tbody.innerHTML = ''; 
+            const allTx = [...globalState.transactions].reverse(); 
+
+            allTx.forEach(tx => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${tx.time}</td>
+                    <td><strong>${tx.name}</strong></td>
+                    <td>${tx.typeDef.name}</td>
+                    <td style="font-family: monospace;">${tx.ref}</td>
+                    <td style="font-weight: bold;">${formatMoney(tx.typeDef.price)}</td>
+                    <td><span class="badge ${tx.status.toLowerCase()}">${tx.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderFacilityGrids() {
+            const lockerGrid = document.getElementById('locker-grid');
+            lockerGrid.innerHTML = '';
+            globalState.lockers.forEach((occupantName, index) => {
+                const box = document.createElement('div');
+                const num = (index + 1).toString().padStart(2, '0');
+                
+                if (occupantName) {
+                    box.className = 'grid-box occupied';
+                    box.innerHTML = `<h4>L-${num}</h4><p>${occupantName}</p>`;
+                    box.onclick = () => checkoutFacility('locker', index);
+                } else {
+                    box.className = 'grid-box available';
+                    box.innerHTML = `<h4>L-${num}</h4><p>Available</p>`;
+                }
+                lockerGrid.appendChild(box);
+            });
+
+            const showerGrid = document.getElementById('shower-grid');
+            showerGrid.innerHTML = '';
+            globalState.showers.forEach((occupantName, index) => {
+                const box = document.createElement('div');
+                const num = (index + 1).toString().padStart(2, '0');
+                
+                if (occupantName) {
+                    box.className = 'grid-box occupied';
+                    box.innerHTML = `<h4>S-${num}</h4><p>${occupantName}</p>`;
+                    box.onclick = () => checkoutFacility('shower', index);
+                } else {
+                    box.className = 'grid-box available';
+                    box.innerHTML = `<h4>S-${num}</h4><p>Available</p>`;
+                }
+                showerGrid.appendChild(box);
+            });
+        }
+
+        // --- ADMIN ACTIONS ---
+        function approveTransaction(id) {
+            fetchGlobalState(); // Ensure we have latest
+            const tx = globalState.transactions.find(t => t.id === id);
+            if (tx && tx.status === 'Pending') {
+                tx.status = 'Paid';
+                globalState.pendingCount--;
+                globalState.revenue += tx.typeDef.price;
+                saveGlobalState();
+                updateUI();
+            }
+        }
+
+        function checkoutFacility(type, index) {
+            if (confirm("Are you sure you want to check out this student and free up the facility?")) {
+                fetchGlobalState();
+                if (type === 'locker') { globalState.lockers[index] = null; } 
+                else if (type === 'shower') { globalState.showers[index] = null; }
+                saveGlobalState();
+                updateUI();
+            }
+        }
+
+        function factoryReset() {
+            if (confirm("WARNING: This will wipe all current transactions and reset the dashboard globally. Proceed?")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

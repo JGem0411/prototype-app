@@ -5,329 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Locker Lounge Prototype</title>
     <style>
-        /* CSS Variables for Brand Colors */
         :root {
             --primary-teal: #008080;
             --light-teal: #e0f2f1;
             --dark-grey: #333333;
             --white: #ffffff;
             --bg-color: #f4f7f6;
+            --warning: #ff9800;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
 
-        body {
-            background-color: #e9ecef;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+        .external-reset { position: fixed; top: 30px; right: 30px; background-color: #ff4d4d; color: white; border: none; padding: 15px 25px; font-size: 1rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
+        .external-admin { position: fixed; top: 30px; left: 30px; background-color: var(--dark-grey); color: white; border: none; padding: 15px 25px; font-size: 1rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
 
-        /* External Prototype Reset Button */
-        .external-reset {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: background-color 0.2s;
-        }
+        #mobile-container { width: 375px; height: 812px; background-color: var(--bg-color); border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; border: 8px solid var(--dark-grey); }
 
-        .external-reset:hover {
-            background-color: #cc0000;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Mobile Phone Container Simulation (For Desktop/Laptops) */
-        #mobile-container {
-            width: 375px;
-            height: 812px;
-            background-color: var(--bg-color);
-            border-radius: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-            position: relative;
-            border: 8px solid var(--dark-grey);
-        }
+        .screen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; flex-direction: column; background-color: var(--bg-color); }
+        .screen.active { display: flex; animation: fadeIn 0.4s ease-in-out; }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        #splash-screen { background-color: var(--primary-teal); color: var(--white); justify-content: center; align-items: center; text-align: center; }
+        .app-logo { width: 120px; height: 120px; margin-bottom: 15px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); animation: slideUp 0.4s ease-out; object-fit: cover; background-color: #f4f4f4; }
+        #splash-screen h1 { font-size: 2.5rem; margin-bottom: 10px; animation: slideUp 0.6s ease-out; }
+        #splash-screen p { font-size: 1rem; margin-bottom: 30px; opacity: 0.9; animation: slideUp 0.8s ease-out; }
+        .name-input { width: 80%; padding: 15px; border-radius: 25px; border: none; text-align: center; font-size: 1rem; margin-bottom: 20px; animation: slideUp 1s ease-out; outline: none; }
+        .btn-start { background-color: var(--white); color: var(--primary-teal); border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); animation: slideUp 1.2s ease-out; }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .screen {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: none;
-            flex-direction: column;
-            background-color: var(--bg-color);
-        }
-
-        .screen.active {
-            display: flex;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        /* --- SPLASH SCREEN --- */
-        #splash-screen {
-            background-color: var(--primary-teal);
-            color: var(--white);
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
+        .header { background-color: var(--primary-teal); color: var(--white); padding: 40px 20px 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .content { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 40px; }
+        .card { background-color: var(--white); padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); animation: slideUp 0.4s ease-out forwards; }
+        .card h3 { color: var(--dark-grey); margin-bottom: 5px; }
+        .status { color: var(--primary-teal); font-weight: bold; font-size: 0.85rem; margin-bottom: 15px; }
         
-        .app-logo {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 15px;
-            border-radius: 25px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            animation: slideUp 0.4s ease-out;
-            object-fit: cover;
-            background-color: #f4f4f4; 
-        }
+        .btn-action { width: 100%; background-color: var(--primary-teal); color: var(--white); border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn-combo { background-color: #ff9800; color: white; }
 
-        #splash-screen h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            animation: slideUp 0.6s ease-out;
-        }
+        .back-btn { background: none; border: none; color: var(--white); font-size: 1rem; margin-bottom: 15px; cursor: pointer; }
+        .options-group { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: none; }
+        .options-group label { display: block; font-size: 0.85rem; color: var(--dark-grey); margin-bottom: 5px; font-weight: bold; }
+        .options-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; margin-bottom: 10px; outline: none; }
+        
+        .payment-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .pay-btn { background-color: var(--light-teal); color: var(--primary-teal); border: 2px solid var(--primary-teal); padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .qrph-box { width: 180px; height: 180px; background: url('https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=QRPH_Mock_Payment') no-repeat center center; background-size: cover; margin: 20px auto; border: 8px solid var(--primary-teal); border-radius: 10px; }
 
-        #splash-screen p {
-            font-size: 1rem;
-            margin-bottom: 30px;
-            opacity: 0.9;
-            animation: slideUp 0.8s ease-out;
-        }
+        #success-screen { align-items: center; text-align: center; overflow-y: auto; }
+        .qr-box { width: 150px; height: 150px; background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LockerLoungeAccessKey12345') no-repeat center center; background-size: cover; margin: 10px auto; border: 8px solid var(--white); border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .ref-box { margin: 10px auto; width: 90%; padding: 15px; border: 2px dashed var(--primary-teal); border-radius: 15px; background-color: var(--light-teal); }
 
-        .name-input {
-            width: 80%;
-            padding: 15px;
-            border-radius: 25px;
-            border: none;
-            text-align: center;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            animation: slideUp 1s ease-out;
-            outline: none;
-        }
-
-        .btn-start {
-            background-color: var(--white);
-            color: var(--primary-teal);
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            animation: slideUp 1.2s ease-out;
-            transition: transform 0.2s;
-        }
-
-        .btn-start:active {
-            transform: scale(0.95);
-        }
-
-        /* --- DASHBOARD SCREEN --- */
-        .header {
-            background-color: var(--primary-teal);
-            color: var(--white);
-            padding: 40px 20px 20px;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-        }
-
-        .content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 40px;
-        }
-
-        .card {
-            background-color: var(--white);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            animation: slideUp 0.4s ease-out forwards;
-        }
-
-        .card h3 {
-            color: var(--dark-grey);
-            margin-bottom: 5px;
-        }
-
-        .status {
-            color: var(--primary-teal);
-            font-weight: bold;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-        }
-
-        .btn-action {
-            width: 100%;
-            background-color: var(--primary-teal);
-            color: var(--white);
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-combo {
-            background-color: #ff9800; 
-            color: white;
-        }
-
-        /* --- BOOKING & PAYMENT SCREENS --- */
-        .back-btn {
-            background: none;
-            border: none;
-            color: var(--white);
-            font-size: 1rem;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-
-        .options-group {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-            display: none; 
-        }
-
-        .options-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--dark-grey);
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .options-group select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            outline: none;
-        }
-
-        .payment-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .pay-btn {
-            background-color: var(--light-teal);
-            color: var(--primary-teal);
-            border: 2px solid var(--primary-teal);
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .qrph-box {
-            width: 180px;
-            height: 180px;
-            background: url('https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=QRPH_Mock_Payment') no-repeat center center;
-            background-size: cover;
-            margin: 20px auto;
-            border: 8px solid var(--primary-teal);
-            border-radius: 10px;
-        }
-
-        /* --- SUCCESS SCREEN --- */
-        #success-screen {
-            align-items: center;
-            text-align: center;
-            overflow-y: auto;
-        }
-
-        .qr-box {
-            width: 150px;
-            height: 150px;
-            background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LockerLoungeAccessKey12345') no-repeat center center;
-            background-size: cover;
-            margin: 10px auto;
-            border: 8px solid var(--white);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .ref-box {
-            margin: 10px auto;
-            width: 90%;
-            padding: 15px;
-            border: 2px dashed var(--primary-teal);
-            border-radius: 15px;
-            background-color: var(--light-teal);
-        }
-
-        /* --- FULL SCREEN MOBILE OVERRIDE --- */
         @media (max-width: 600px) {
-            body {
-                align-items: flex-start;
-                background-color: var(--bg-color);
-            }
-            #mobile-container {
-                width: 100vw;
-                height: 100vh;
-                border-radius: 0;
-                border: none;
-                box-shadow: none;
-            }
-            .external-reset {
-                top: 10px;
-                right: 10px;
-                padding: 10px;
-                font-size: 0.8rem;
-                opacity: 0.8; /* Slightly faded so it doesn't distract on phone */
-            }
+            body { align-items: flex-start; background-color: var(--bg-color); }
+            #mobile-container { width: 100vw; height: 100vh; border-radius: 0; border: none; box-shadow: none; }
+            .external-reset, .external-admin { top: 10px; padding: 10px; font-size: 0.8rem; opacity: 0.8; }
+            .external-reset { right: 10px; } .external-admin { left: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <button class="external-reset" onclick="resetPrototype()">🔄 Reset Prototype Data</button>
+    <button class="external-admin" onclick="window.location.href='admin-dashboard.html'">👨‍💻 Admin View</button>
+    <button class="external-reset" onclick="resetPrototype()">🔄 Reset System</button>
 
     <div id="mobile-container">
         
         <div id="splash-screen" class="screen active">
-            <img src="logo.png" alt="Locker Lounge Logo" class="app-logo">
+            <img src="logo.png" alt="Locker Lounge Logo" class="app-logo" onerror="this.style.display='none'">
             <h1>Locker Lounge</h1>
             <p>Refresh. Secure. Recharge.</p>
             <input type="text" id="userNameInput" class="name-input" placeholder="Enter your first name" autocomplete="off">
@@ -344,17 +90,18 @@
                 <div class="card" id="active-booking-card" style="display: none; border: 2px solid var(--primary-teal); background-color: var(--light-teal);">
                     <h3>Your Active Pass</h3>
                     <p id="active-pass-status" class="status" style="color: var(--dark-grey);">You have a confirmed reservation.</p>
+                    <p id="payment-status-badge" style="font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; color: var(--warning);"></p>
                     <button class="btn-action" onclick="generateSuccess()">View Access Key / Reference</button>
                 </div>
 
                 <div class="card">
                     <h3>Smart Locker</h3>
-                    <p class="status">🟢 12 Units Available</p>
+                    <p class="status" id="dash-locker-avail">🟢 Loading...</p>
                     <button class="btn-action" onclick="initiateBooking('locker')">Book Locker</button>
                 </div>
                 <div class="card">
                     <h3>Premium Shower</h3>
-                    <p class="status">🟡 2 Suites Available</p>
+                    <p class="status" id="dash-shower-avail">🟡 Loading...</p>
                     <button class="btn-action" style="background-color: var(--dark-grey);" onclick="initiateBooking('shower')">Reserve Shower</button>
                 </div>
                 <div class="card" style="border: 2px solid #ff9800;">
@@ -413,7 +160,7 @@
                 <p style="color: var(--dark-grey); font-weight: bold;">Scan via GCash or Maya</p>
                 <div class="qrph-box"></div>
                 <p style="margin-bottom: 30px; font-size: 0.9rem;">Waiting for payment confirmation...</p>
-                <button class="btn-action" style="width: 90%;" onclick="confirmPayment()">Confirm Payment</button>
+                <button class="btn-action" style="width: 90%;" onclick="confirmPayment('Paid')">Simulate Scan Success</button>
             </div>
         </div>
 
@@ -429,125 +176,150 @@
                     <h3 id="onsite-ref-display" style="color: #ff9800; letter-spacing: 2px; margin-top: 5px; font-size: 1.4rem;">GUEST-123456</h3>
                 </div>
                 <p style="margin-bottom: 30px; font-size: 0.9rem; color: #ff9800; font-weight: bold;">Status: Awaiting Payment...</p>
-                
-                <button class="btn-action" style="width: 90%; background-color: var(--dark-grey);" onclick="confirmPayment()">Simulate Front Desk Approval</button>
+                <button class="btn-action" style="width: 90%; background-color: var(--dark-grey);" onclick="confirmPayment('Pending')">Confirm Reservation</button>
             </div>
         </div>
 
         <div id="success-screen" class="screen">
-            <h2 style="color: var(--primary-teal); margin-top: 40px; margin-bottom: 10px;">Booking Confirmed!</h2>
-            
-            <div id="dynamic-content" style="width: 100%; padding: 0 20px;">
-                </div>
-
+            <h2 style="color: var(--primary-teal); margin-top: 40px; margin-bottom: 10px;">Booking Success!</h2>
+            <div id="dynamic-content" style="width: 100%; padding: 0 20px;"></div>
             <button class="btn-action" style="width: 80%; margin: 20px auto 40px auto;" onclick="navTo('dashboard')">Back to Home</button>
         </div>
 
     </div>
 
     <script>
-        let currentBookingType = '';
-        let currentUserName = 'GUEST';
-        let currentRefNumber = ''; 
+        // --- SYNCHRONIZED DATABASE SETUP ---
+        let globalState = {
+            revenue: 0, pendingCount: 0, lockers: Array(12).fill(null), showers: Array(2).fill(null), transactions: []
+        };
 
-        // New Independent Tracking Variables
-        let ownsLocker = false;
-        let ownsShower = false;
-        let showerRefNumber = ''; 
+        function fetchGlobalState() {
+            let data = localStorage.getItem('LL_GlobalState');
+            if (data) { globalState = JSON.parse(data); } 
+            else { localStorage.setItem('LL_GlobalState', JSON.stringify(globalState)); }
+        }
 
-        // 1. Local Storage Check on App Load (Failsafe)
-        document.addEventListener('DOMContentLoaded', () => {
-            ownsLocker = localStorage.getItem('LL_ownsLocker') === 'true';
-            ownsShower = localStorage.getItem('LL_ownsShower') === 'true';
-            showerRefNumber = localStorage.getItem('LL_showerRef') || '';
-            currentUserName = localStorage.getItem('LL_userName') || 'GUEST';
-            
-            if (ownsLocker || ownsShower) {
-                document.getElementById('displayName').innerText = currentUserName;
-                document.getElementById('active-booking-card').style.display = 'block';
-                
-                // Update text dynamically based on what they own
-                let passText = [];
-                if(ownsLocker) passText.push("Locker");
-                if(ownsShower) passText.push("Shower");
-                document.getElementById('active-pass-status').innerText = "Active: " + passText.join(" & ");
-                
-                navTo('dashboard');
-            }
-        });
+        function saveGlobalState() {
+            localStorage.setItem('LL_GlobalState', JSON.stringify(globalState));
+        }
 
-        // 2. Clear Local Storage and Refresh
         function resetPrototype() {
             localStorage.clear();
             window.location.reload();
         }
 
-        // --- Core App Functions ---
+        // --- LOCAL USER STATE ---
+        let currentBookingType = '';
+        let currentPrice = 0;
+        let currentUserName = 'GUEST';
+        let currentRefNumber = ''; 
+        let myTransactionId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchGlobalState();
+            currentUserName = localStorage.getItem('LL_userName') || 'GUEST';
+            myTransactionId = localStorage.getItem('LL_myTxId');
+            
+            if (myTransactionId) {
+                document.getElementById('displayName').innerText = currentUserName;
+                navTo('dashboard');
+            }
+            
+            // Start Real-Time Sync Loop
+            setInterval(syncUserDashboard, 1000);
+        });
+
+        // --- REAL-TIME SYNC LOOP ---
+        function syncUserDashboard() {
+            fetchGlobalState();
+
+            // Update Capacity UI
+            const usedLockers = globalState.lockers.filter(l => l !== null).length;
+            const usedShowers = globalState.showers.filter(s => s !== null).length;
+            document.getElementById('dash-locker-avail').innerText = `🟢 ${12 - usedLockers} Units Available`;
+            document.getElementById('dash-shower-avail').innerText = `🟡 ${2 - usedShowers} Suites Available`;
+
+            // Check if user has an active booking
+            if (myTransactionId) {
+                const myTx = globalState.transactions.find(t => t.id == myTransactionId);
+                
+                // If transaction exists and user is still holding at least one facility
+                let stillHoldsLocker = globalState.lockers.includes(currentUserName);
+                let stillHoldsShower = globalState.showers.includes(currentUserName);
+
+                if (myTx && (stillHoldsLocker || stillHoldsShower)) {
+                    document.getElementById('active-booking-card').style.display = 'block';
+                    
+                    let passText = [];
+                    if(stillHoldsLocker) passText.push("Locker");
+                    if(stillHoldsShower) passText.push("Shower");
+                    document.getElementById('active-pass-status').innerText = "Active: " + passText.join(" & ");
+
+                    const badge = document.getElementById('payment-status-badge');
+                    if (myTx.status === 'Pending') {
+                        badge.innerText = "Payment: PENDING AT FRONT DESK";
+                        badge.style.color = "#ff9800";
+                    } else {
+                        badge.innerText = "Payment: VERIFIED ✓";
+                        badge.style.color = "#28a745";
+                    }
+                } else {
+                    // Admin checked them out!
+                    document.getElementById('active-booking-card').style.display = 'none';
+                    localStorage.removeItem('LL_myTxId');
+                    myTransactionId = null;
+                }
+            }
+        }
+
+        // --- APP NAVIGATION & LOGIC ---
         function login() {
             const nameInput = document.getElementById('userNameInput').value.trim();
             if (nameInput !== '') {
                 currentUserName = nameInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                document.getElementById('displayName').innerText = nameInput;
-            } else {
-                currentUserName = 'GUEST';
-                document.getElementById('displayName').innerText = 'Commuter';
             }
+            localStorage.setItem('LL_userName', currentUserName);
+            document.getElementById('displayName').innerText = currentUserName;
             navTo('dashboard');
+            syncUserDashboard();
         }
 
         function navTo(targetScreenId) {
-            const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => {
-                screen.classList.remove('active');
-            });
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
             document.getElementById(targetScreenId).classList.add('active');
         }
 
         function initiateBooking(type) {
-            currentBookingType = type;
-            const lockerOpts = document.getElementById('lockerOptions');
-            const showerOpts = document.getElementById('showerOptions');
+            fetchGlobalState();
+            const usedLockers = globalState.lockers.filter(l => l !== null).length;
+            const usedShowers = globalState.showers.filter(s => s !== null).length;
 
+            if ((type === 'locker' || type === 'combo') && usedLockers >= 12) { alert("Lockers are fully booked!"); return; }
+            if ((type === 'shower' || type === 'combo') && usedShowers >= 2) { alert("Showers are fully booked!"); return; }
+
+            currentBookingType = type;
+            document.getElementById('lockerOptions').style.display = (type === 'locker' || type === 'combo') ? 'block' : 'none';
+            document.getElementById('showerOptions').style.display = (type === 'shower' || type === 'combo') ? 'block' : 'none';
+            
+            document.getElementById('bookingTitle').innerText = type === 'combo' ? 'Refresh Combo Pass' : (type === 'locker' ? 'Smart Locker' : 'Premium Shower');
+            
             document.getElementById('lockerDuration').value = "40";
             document.getElementById('showerAddon').value = "0";
-            
-            if (type === 'locker') {
-                document.getElementById('bookingTitle').innerText = 'Smart Locker';
-                lockerOpts.style.display = 'block';
-                showerOpts.style.display = 'none';
-            } else if (type === 'shower') {
-                document.getElementById('bookingTitle').innerText = 'Premium Shower Suite';
-                lockerOpts.style.display = 'none';
-                showerOpts.style.display = 'block';
-            } else if (type === 'combo') {
-                document.getElementById('bookingTitle').innerText = 'Refresh Combo Pass';
-                lockerOpts.style.display = 'block';
-                showerOpts.style.display = 'block';
-            }
-            
             updatePrice(); 
             navTo('booking');
         }
 
         function updatePrice() {
             let total = 0;
-            const lockerPrice = parseInt(document.getElementById('lockerDuration').value);
-            const showerAddonPrice = parseInt(document.getElementById('showerAddon').value);
-            const lockerText = document.getElementById('lockerDuration').options[document.getElementById('lockerDuration').selectedIndex].text.split(' (')[0];
-            const showerText = document.getElementById('showerAddon').options[document.getElementById('showerAddon').selectedIndex].text.split(' (')[0];
+            const locVal = parseInt(document.getElementById('lockerDuration').value);
+            const shoVal = parseInt(document.getElementById('showerAddon').value);
+            
+            if (currentBookingType === 'locker') total = locVal;
+            else if (currentBookingType === 'shower') total = 60 + shoVal;
+            else if (currentBookingType === 'combo') total = 85 + (locVal - 40) + shoVal;
 
-            if (currentBookingType === 'locker') {
-                total = lockerPrice;
-                document.getElementById('bookingDetails').innerText = `Time: ${lockerText}`;
-            } else if (currentBookingType === 'shower') {
-                total = 60 + showerAddonPrice; 
-                document.getElementById('bookingDetails').innerText = `Add-ons: ${showerText}`;
-            } else if (currentBookingType === 'combo') {
-                const extraLockerCost = lockerPrice - 40; 
-                total = 85 + extraLockerCost + showerAddonPrice;
-                document.getElementById('bookingDetails').innerText = `Locker: ${lockerText}\nShower: ${showerText}`;
-            }
-
+            currentPrice = total;
             document.getElementById('bookingPrice').innerText = `Total: ₱${total.toFixed(2)}`;
         }
 
@@ -562,59 +334,84 @@
             navTo('onsite-payment');
         }
 
-        function confirmPayment() {
-            // Update ownership based on what was just bought
-            if (currentBookingType === 'locker') {
-                ownsLocker = true;
-            } else if (currentBookingType === 'shower') {
-                ownsShower = true;
-                showerRefNumber = currentRefNumber;
-            } else if (currentBookingType === 'combo') {
-                ownsLocker = true;
-                ownsShower = true;
-                showerRefNumber = currentRefNumber;
+        function confirmPayment(status) {
+            fetchGlobalState(); // Get latest data to avoid overwriting
+
+            // Create Transaction Object for Admin
+            const typeName = currentBookingType === 'combo' ? 'Refresh Combo' : (currentBookingType === 'locker' ? 'Smart Locker' : 'Premium Shower');
+            
+            const newTx = {
+                id: Date.now(),
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+                name: currentUserName,
+                typeDef: { name: typeName, price: currentPrice },
+                ref: currentRefNumber,
+                status: status
+            };
+
+            // Claim Capacity globally
+            if (currentBookingType === 'locker' || currentBookingType === 'combo') {
+                const emptyIdx = globalState.lockers.indexOf(null);
+                if (emptyIdx !== -1) globalState.lockers[emptyIdx] = currentUserName;
+            }
+            if (currentBookingType === 'shower' || currentBookingType === 'combo') {
+                const emptyIdx = globalState.showers.indexOf(null);
+                if (emptyIdx !== -1) globalState.showers[emptyIdx] = currentUserName;
             }
 
-            // Save to Local Storage
-            localStorage.setItem('LL_ownsLocker', ownsLocker);
-            localStorage.setItem('LL_ownsShower', ownsShower);
-            localStorage.setItem('LL_showerRef', showerRefNumber);
-            localStorage.setItem('LL_userName', currentUserName);
-            
-            // Update Dashboard UI
-            document.getElementById('active-booking-card').style.display = 'block';
-            let passText = [];
-            if(ownsLocker) passText.push("Locker");
-            if(ownsShower) passText.push("Shower");
-            document.getElementById('active-pass-status').innerText = "Active: " + passText.join(" & ");
+            // Update financials
+            globalState.transactions.push(newTx);
+            if (status === 'Paid') globalState.revenue += currentPrice;
+            if (status === 'Pending') globalState.pendingCount++;
 
+            // Save back to local storage
+            saveGlobalState();
+
+            // Save local user identifier
+            myTransactionId = newTx.id;
+            localStorage.setItem('LL_myTxId', myTransactionId);
+
+            syncUserDashboard();
             generateSuccess();
         }
 
         function generateSuccess() {
+            fetchGlobalState();
             const contentDiv = document.getElementById('dynamic-content');
             const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             let htmlContent = '';
 
-            // Layout based on ALL owned items, not just the current booking
-            if (ownsLocker) {
+            let holdsLocker = globalState.lockers.includes(currentUserName);
+            let holdsShower = globalState.showers.includes(currentUserName);
+
+            if (holdsLocker) {
+                // Find which locker they occupy
+                const locIndex = globalState.lockers.indexOf(currentUserName) + 1;
+                const locNum = locIndex.toString().padStart(2, '0');
+                
                 htmlContent += `
                     <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                         <p style="color: var(--dark-grey); font-size: 0.9rem;">Locker Access Key</p>
                         <div class="qr-box"></div>
-                        <p style="font-weight: bold; font-size: 1.1rem; color: var(--primary-teal);">Locker #08</p>
-                    </div>
-                `;
+                        <p style="font-weight: bold; font-size: 1.1rem; color: var(--primary-teal);">Locker #${locNum}</p>
+                    </div>`;
             }
 
-            if (ownsShower) {
+            if (holdsShower) {
+                // Find which shower they occupy
+                const shoIndex = globalState.showers.indexOf(currentUserName) + 1;
+                const shoNum = shoIndex.toString().padStart(2, '0');
+
+                // Find their reference number
+                const myTx = globalState.transactions.find(t => t.id == myTransactionId);
+                const refCode = myTx ? myTx.ref : currentUserName + '-XXX';
+
                 htmlContent += `
                     <div class="ref-box">
-                        <p style="font-size: 0.8rem; color: var(--dark-grey);">Shower Reference</p>
-                        <h3 style="color: var(--primary-teal); letter-spacing: 1px; margin-top: 5px; font-size: 1.2rem;">${showerRefNumber}</h3>
+                        <p style="font-size: 0.8rem; color: var(--dark-grey);">Shower Reference (Suite #${shoNum})</p>
+                        <h3 style="color: var(--primary-teal); letter-spacing: 1px; margin-top: 5px; font-size: 1.2rem;">${refCode}</h3>
                         <p style="font-size: 0.8rem; color: var(--dark-grey); margin-top: 5px;">Date: ${today}</p>
-                    </div>
-                `;
+                    </div>`;
             }
 
             contentDiv.innerHTML = htmlContent;
